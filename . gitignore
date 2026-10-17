@@ -1,0 +1,6 @@
+# Database file (test data upload nahi karna)
+students.db
+
+# Python ki temporary files
+__pycache__/
+*.pyc
