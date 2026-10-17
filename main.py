@@ -1,13 +1,13 @@
 # ========== IMPORTS ==========
-import sqlite3   # database ke liye (Python mein pehle se hai)
+import sqlite3   # for the database (comes with Python)
 
 
 # ========== 1. DATABASE SETUP ==========
-# students.db file khud ban jayegi
+# The students.db file is created automatically
 conn = sqlite3.connect("students.db")
 cursor = conn.cursor()
 
-# Table banao (agar pehle se nahi hai)
+# Create the table if it does not exist yet
 cursor.execute("""
     CREATE TABLE IF NOT EXISTS students (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -19,90 +19,90 @@ cursor.execute("""
 conn.commit()
 
 
-# ========== 2. STUDENT ADD KARNA ==========
+# ========== 2. ADD A STUDENT ==========
 def add_student():
-    name = input("Naam: ").strip()
+    name = input("Name: ").strip()
     course = input("Course (BCA/BBA etc): ").strip()
 
     try:
         marks = float(input("Marks: "))
     except ValueError:
-        print("Marks number mein likho!")
+        print("Please enter marks as a number!")
         return
 
-    # ? placeholder se data safe tareeke se jata hai
+    # The ? placeholders send data safely (prevents SQL injection)
     cursor.execute(
         "INSERT INTO students (name, course, marks) VALUES (?, ?, ?)",
         (name, course, marks),
     )
     conn.commit()
-    print("Student add ho gaya!")
+    print("Student added!")
 
 
-# ========== 3. SAARE STUDENTS DEKHNA ==========
+# ========== 3. VIEW ALL STUDENTS ==========
 def view_students():
     cursor.execute("SELECT * FROM students")
     rows = cursor.fetchall()
 
     if not rows:
-        print("Abhi koi student nahi hai.")
+        print("No students yet.")
         return
 
-    print("\nID | Naam | Course | Marks")
+    print("\nID | Name | Course | Marks")
     for row in rows:
         print(f"{row[0]} | {row[1]} | {row[2]} | {row[3]}")
 
 
-# ========== 4. NAAM SE SEARCH KARNA ==========
+# ========== 4. SEARCH BY NAME ==========
 def search_student():
-    name = input("Kis naam ko dhundna hai: ").strip()
+    name = input("Enter the name to search: ").strip()
 
-    # LIKE se aadha naam likhne par bhi mil jata hai
+    # LIKE also matches part of a name
     cursor.execute("SELECT * FROM students WHERE name LIKE ?", (f"%{name}%",))
     rows = cursor.fetchall()
 
     if not rows:
-        print("Koi student nahi mila.")
+        print("No student found.")
         return
 
     for row in rows:
         print(f"{row[0]} | {row[1]} | {row[2]} | {row[3]}")
 
 
-# ========== 5. MARKS UPDATE KARNA ==========
+# ========== 5. UPDATE MARKS ==========
 def update_marks():
     try:
         student_id = int(input("Student ID: "))
-        marks = float(input("Naye marks: "))
+        marks = float(input("New marks: "))
     except ValueError:
-        print("ID aur marks number mein likho!")
+        print("Please enter the ID and marks as numbers!")
         return
 
     cursor.execute("UPDATE students SET marks = ? WHERE id = ?", (marks, student_id))
     conn.commit()
 
-    # rowcount = kitni row badli. 0 matlab ID mili hi nahi
+    # rowcount = number of rows changed; 0 means the ID was not found
     if cursor.rowcount == 0:
-        print("Is ID ka student nahi mila.")
+        print("No student found with this ID.")
     else:
-        print("Marks update ho gaye!")
+        print("Marks updated!")
 
 
-# ========== 6. STUDENT DELETE KARNA ==========
+# ========== 6. DELETE A STUDENT ==========
 def delete_student():
     try:
-        student_id = int(input("Delete karne wale ka ID: "))
+        student_id = int(input("ID of the student to delete: "))
     except ValueError:
-        print("ID number mein likho!")
+        print("Please enter the ID as a number!")
         return
 
     cursor.execute("DELETE FROM students WHERE id = ?", (student_id,))
     conn.commit()
 
     if cursor.rowcount == 0:
-        print("Is ID ka student nahi mila.")
+        print("No student found with this ID.")
     else:
-        print("Student delete ho gaya!")
+        print("Student deleted!")
 
 
 # ========== 7. MAIN MENU ==========
@@ -121,8 +121,8 @@ while True:
     elif choice == "5":
         delete_student()
     elif choice == "6":
-        conn.close()   # database band karo
+        conn.close()   # close the database
         print("Bye!")
         break
     else:
-        print("Galat option, dobara try karo.")
+        print("Invalid option, please try again.")
